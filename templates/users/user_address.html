@@ -1,0 +1,69 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}Default Shipping Address - SmartCart{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-2 py-md-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="sc-card p-3 p-sm-4 p-md-5 shadow-sm">
+            <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 bg-primary-subtle text-primary p-3 fs-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0 fs-4 fs-md-3">Default Shipping Address</h3>
+                        <p class="text-muted small mb-0">Manage your saved address for one-click checkout.</p>
+                    </div>
+                </div>
+                <a href="/user-dashboard" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                </a>
+            </div>
+
+            <form method="POST" action="/user-address">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="addrName">Full Name <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                        <input type="text" id="addrName" name="full_name" class="form-control" placeholder="Recipient's Name" value="{{ address.full_name or '' }}" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="addrPhone">Contact Phone <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-muted"><i class="bi bi-telephone"></i></span>
+                        <input type="tel" id="addrPhone" name="phone" class="form-control" placeholder="10-digit Mobile Number" value="{{ address.phone or '' }}" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="addrStreet">Street Address <span class="text-danger">*</span></label>
+                    <textarea id="addrStreet" name="street" class="form-control" rows="3" placeholder="House/Flat No., Street, Landmark" required>{{ address.street or '' }}</textarea>
+                </div>
+
+                <div class="row g-2 g-sm-3 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label fw-semibold" for="addrCity">City <span class="text-danger">*</span></label>
+                        <input type="text" id="addrCity" name="city" class="form-control" placeholder="City" value="{{ address.city or '' }}" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label fw-semibold" for="addrState">State <span class="text-danger">*</span></label>
+                        <input type="text" id="addrState" name="state" class="form-control" placeholder="State" value="{{ address.state or '' }}" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" for="addrPincode">Postal / PIN Code <span class="text-danger">*</span></label>
+                    <input type="text" id="addrPincode" name="pincode" class="form-control font-monospace" placeholder="e.g. 500081" value="{{ address.pincode or '' }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fs-6">
+                    <i class="bi bi-check2-circle me-1"></i> Save Shipping Address
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

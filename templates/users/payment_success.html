@@ -1,0 +1,37 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}Payment Successful - SmartCart{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3 py-md-5">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="sc-card p-3 p-sm-4 p-md-5 text-center shadow-lg">
+            <div class="rounded-circle bg-success-subtle text-success d-inline-flex align-items-center justify-content-center mb-3" style="width: 68px; height: 68px; font-size: 2rem;">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+            <h2 class="fw-bold text-dark mb-1 fs-3 fs-md-2">Payment Received!</h2>
+            <p class="text-muted small mb-4">Your payment has been recorded. Thank you for choosing SmartCart.</p>
+
+            <div class="bg-light rounded-4 p-3 mb-4 text-start border">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-secondary small">Payment ID:</span>
+                    <span class="font-monospace small fw-bold text-dark text-truncate ms-2">{{ payment_id }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary small">Order Ref:</span>
+                    <span class="font-monospace small fw-bold text-dark text-truncate ms-2">{{ order_id }}</span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                <a href="/user/my-orders" class="btn btn-primary px-4 py-2">
+                    <i class="bi bi-box-seam me-1"></i> View My Orders
+                </a>
+                <a href="/user/products" class="btn btn-outline-secondary px-4 py-2">
+                    <i class="bi bi-cart me-1"></i> Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

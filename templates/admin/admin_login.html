@@ -1,0 +1,52 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Admin Login - SmartCart Control Center{% endblock %}
+
+{% block content %}
+<div class="sc-auth-wrapper">
+    <div class="sc-auth-card">
+        <div class="sc-auth-header">
+            <div class="sc-auth-icon" style="background: #e0f2fe; color: #0284c7;">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1 fs-4 fs-md-3">Admin Portal</h3>
+            <p class="text-muted small">Sign in with administrator credentials</p>
+        </div>
+
+        <form method="POST" action="/admin-login">
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label" for="adminLoginEmail">Admin Email</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <input type="email" id="adminLoginEmail" name="email" class="form-control border-start-0" placeholder="admin@smartcart.local" required autofocus>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label class="form-label" for="adminLoginPassword">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input type="password" id="adminLoginPassword" name="password" class="form-control border-start-0" placeholder="Enter administrative password" required>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 py-2 fs-6 fw-semibold mb-3">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Access Admin Console
+            </button>
+        </form>
+
+        <div class="text-center pt-3 border-top">
+            <p class="text-muted small mb-0">Need administrative access? 
+                <a href="/admin-signup" class="fw-semibold text-primary">Register as Admin</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

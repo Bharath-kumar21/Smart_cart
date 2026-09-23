@@ -1,0 +1,63 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}Create Account - SmartCart{% endblock %}
+
+{% block content %}
+<div class="sc-auth-wrapper">
+    <div class="sc-auth-card">
+        <div class="sc-auth-header">
+            <div class="sc-auth-icon" style="background: #ecfdf5; color: #059669;">
+                <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1 fs-4 fs-md-3">Create Account</h3>
+            <p class="text-muted small">Join SmartCart for an effortless shopping experience</p>
+        </div>
+
+        <form method="POST" action="/user-register">
+            <!-- Full Name -->
+            <div class="mb-3">
+                <label class="form-label" for="regName">Full Name</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0">
+                        <i class="bi bi-person"></i>
+                    </span>
+                    <input type="text" id="regName" name="name" class="form-control border-start-0" placeholder="e.g. John Doe" required autofocus>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label" for="regEmail">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <input type="email" id="regEmail" name="email" class="form-control border-start-0" placeholder="name@example.com" required>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label class="form-label" for="regPassword">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input type="password" id="regPassword" name="password" class="form-control border-start-0" placeholder="Create a secure password" required minlength="6">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 py-2 fs-6 fw-semibold mb-3">
+                <i class="bi bi-check2-circle me-1"></i> Register Account
+            </button>
+        </form>
+
+        <div class="text-center pt-3 border-top">
+            <p class="text-muted small mb-0">Already have an account? 
+                <a href="/user-login" class="fw-semibold text-primary">Sign In</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

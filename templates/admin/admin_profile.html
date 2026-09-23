@@ -1,0 +1,89 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Admin Profile - SmartCart{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-2 py-md-4">
+    <div class="col-12 col-lg-8">
+        <div class="sc-card p-3 p-sm-4 p-md-5 shadow-sm">
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between mb-4 pb-3 border-bottom gap-2">
+                <div>
+                    <h3 class="fw-bold mb-1 fs-4 fs-md-3"><i class="bi bi-person-gear text-primary me-2"></i>Admin Profile</h3>
+                    <p class="text-muted small mb-0">Update your account credentials and avatar photo.</p>
+                </div>
+                <a href="/admin-dashboard" class="btn btn-outline-secondary btn-sm align-self-start align-self-sm-center">
+                    <i class="bi bi-arrow-left me-1"></i> Dashboard
+                </a>
+            </div>
+
+            <!-- Profile Overview Header -->
+            <div class="d-flex flex-column flex-sm-row align-items-center gap-3 p-3 bg-light rounded-4 border mb-4 text-center text-sm-start">
+                <div class="flex-shrink-0">
+                    {% if admin.profile_image %}
+                    <img src="/static/uploads/admin_profiles/{{ admin.profile_image }}" 
+                         alt="{{ admin.name }}"
+                         class="rounded-circle shadow-sm border p-1 bg-white"
+                         style="width: 88px; height: 88px; object-fit: cover;"
+                         onerror="this.src='https://placehold.co/88x88?text=Admin';">
+                    {% else %}
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm mx-auto" style="width: 88px; height: 88px; font-size: 2.25rem; font-weight: bold;">
+                        {{ (admin.name or 'A')[0]|upper }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-1 text-dark fs-5 fs-md-4">{{ admin.name }}</h4>
+                    <p class="text-muted small mb-2"><i class="bi bi-envelope me-1"></i> {{ admin.email }}</p>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
+                        <i class="bi bi-shield-check me-1"></i> Verified Administrator
+                    </span>
+                </div>
+            </div>
+
+            <!-- Profile Edit Form -->
+            <form method="POST" action="/admin/profile" enctype="multipart/form-data">
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold" for="adminName">Full Name <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                            <input type="text" id="adminName" name="name" class="form-control" value="{{ admin.name }}" required>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold" for="adminEmail">Email Address <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
+                            <input type="email" id="adminEmail" name="email" class="form-control" value="{{ admin.email }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="adminPassword">New Password (Leave blank to keep existing)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
+                        <input type="password" id="adminPassword" name="password" class="form-control" placeholder="Enter new password">
+                    </div>
+                    <div class="form-text small text-muted">Only fill this field if you wish to reset your administrative password.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" for="adminProfileImage">Upload New Profile Image (Optional)</label>
+                    <input type="file" id="adminProfileImage" name="profile_image" class="form-control" accept="image/*">
+                    <div class="form-text small text-muted">Supported formats: JPEG, PNG, WEBP.</div>
+                </div>
+
+                <hr class="my-4 text-muted">
+
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end">
+                    <a href="/admin-dashboard" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 py-2">
+                        <i class="bi bi-check2-circle me-1"></i> Update Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

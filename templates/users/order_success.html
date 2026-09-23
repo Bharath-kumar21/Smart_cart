@@ -1,0 +1,124 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}Order Confirmed - SmartCart{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-2 py-md-4">
+    <div class="col-12 col-lg-8">
+        <div class="sc-card p-3 p-sm-4 p-md-5 shadow-lg">
+            <!-- Success Header -->
+            <div class="text-center mb-4">
+                <div class="rounded-circle bg-success-subtle text-success d-inline-flex align-items-center justify-content-center mb-3" style="width: 68px; height: 68px; font-size: 2.25rem;">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-1 fs-3 fs-md-2">🎉 Order Confirmed!</h2>
+                <p class="text-muted small mb-0">Thank you for shopping with <strong>SmartCart</strong>. We're processing your order.</p>
+            </div>
+
+            <!-- Order Metadata Cards -->
+            <div class="bg-light rounded-4 p-3 p-sm-4 mb-4 border">
+                <div class="row g-2 g-sm-3">
+                    <div class="col-6 col-md-3">
+                        <small class="text-muted d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Order ID</small>
+                        <span class="fw-bold text-dark font-monospace">#{{ order.order_id }}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <small class="text-muted d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Date</small>
+                        <span class="fw-medium text-dark small">{{ order.created_at }}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <small class="text-muted d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Total Paid</small>
+                        <span class="fw-bold text-primary">₹{{ "%.2f"|format(order.amount|float) if order.amount is number else order.amount }}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <small class="text-muted d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Status</small>
+                        <span class="badge-status-paid">Paid &bull; Confirmed</span>
+                    </div>
+                    {% if order.razorpay_payment_id %}
+                    <div class="col-12 pt-2 border-top mt-2">
+                        <small class="text-muted me-2">Razorpay Ref:</small>
+                        <span class="font-monospace small text-secondary">{{ order.razorpay_payment_id }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Delivery Details Box (Receipt) -->
+            {% if order.shipping_name or order.shipping_address %}
+            <div class="bg-light rounded-4 p-3 p-sm-4 mb-4 border text-start">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-geo-alt-fill text-primary"></i>
+                    <h6 class="fw-bold text-dark text-uppercase small letter-spacing-1 mb-0">Delivery Address</h6>
+                </div>
+                <div class="row g-2">
+                    <div class="col-12 col-sm-6">
+                        <span class="text-muted small d-block">Recipient:</span>
+                        <strong class="text-dark">{{ order.shipping_name }}</strong>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <span class="text-muted small d-block">Phone:</span>
+                        <span class="text-dark">{{ order.shipping_phone }}</span>
+                    </div>
+                    <div class="col-12 pt-2 border-top mt-1">
+                        <span class="text-muted small d-block">Destination:</span>
+                        <span class="text-dark">{{ order.shipping_address }}, {{ order.city }}, {{ order.state }} - <strong class="font-monospace">{{ order.pincode }}</strong></span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Items Table -->
+            <div class="mb-4">
+                <h5 class="fw-bold text-dark mb-3">Order Items Summary</h5>
+                <div class="sc-table-card">
+                    <div class="table-responsive">
+                        <table class="table sc-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for it in items %}
+                                <tr>
+                                    <td class="fw-medium text-dark">{{ it.product_name }}</td>
+                                    <td class="text-center">{{ it.quantity }}</td>
+                                    <td class="text-end text-muted">₹{{ "%.2f"|format(it.price|float) if it.price is number else it.price }}</td>
+                                    <td class="text-end fw-bold text-dark">
+                                        ₹{{ "%.2f"|format((it.price * it.quantity)|float) }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold fs-6">Grand Total:</td>
+                                    <td class="text-end fw-bold fs-5 text-primary">
+                                        ₹{{ "%.2f"|format(order.amount|float) if order.amount is number else order.amount }}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons (Responsive stack on mobile) -->
+            <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center pt-2">
+                <a href="/user/download-invoice/{{ order.order_id }}" class="btn btn-primary btn-lg px-4 touch-target">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> Download Invoice
+                </a>
+                <a href="/user/my-orders" class="btn btn-outline-primary btn-lg px-4 touch-target">
+                    <i class="bi bi-box-seam me-2"></i> My Orders
+                </a>
+                <a href="/user/products" class="btn btn-outline-secondary btn-lg px-4 touch-target">
+                    <i class="bi bi-cart me-2"></i> Shop More
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

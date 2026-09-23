@@ -1,0 +1,165 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}Checkout - Delivery Address - SmartCart{% endblock %}
+
+{% block content %}
+<!-- Checkout Breadcrumb / Step Indicator -->
+<div class="sc-card p-3 mb-4 shadow-sm">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                <i class="bi bi-check-lg"></i>
+            </span>
+            <a href="/user/cart" class="text-decoration-none text-muted small fw-medium">1. Shopping Cart</a>
+        </div>
+        <i class="bi bi-chevron-right text-muted small d-none d-sm-inline"></i>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary text-white rounded-circle p-2 d-inline-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px;">
+                2
+            </span>
+            <span class="text-primary small fw-bold">2. Delivery Address</span>
+        </div>
+        <i class="bi bi-chevron-right text-muted small d-none d-sm-inline"></i>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-light text-muted border rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                3
+            </span>
+            <span class="text-muted small">3. Secure Payment</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Shipping Address Form -->
+    <div class="col-12 col-lg-8">
+        <div class="sc-card p-3 p-sm-4 p-md-5 shadow-sm">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                <div class="rounded-3 bg-primary-subtle text-primary p-3 fs-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-1 fs-4 fs-md-3 text-dark">Where should we deliver?</h3>
+                    <p class="text-muted small mb-0">Enter your shipping address for order delivery and receipt generation.</p>
+                </div>
+            </div>
+
+            <form method="POST" action="/user/checkout" id="checkoutAddressForm">
+                <!-- Recipient Full Name & Phone -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold" for="fullName">Recipient Full Name <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                            <input type="text" id="fullName" name="full_name" class="form-control" placeholder="e.g. John Doe" value="{{ address.full_name or '' }}" required autofocus>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold" for="phone">Contact Phone Number <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-telephone"></i></span>
+                            <input type="tel" id="phone" name="phone" class="form-control" placeholder="10-digit mobile number" value="{{ address.phone or '' }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Street Address -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="street">House / Flat No., Street, Landmark <span class="text-danger">*</span></label>
+                    <textarea id="street" name="street" class="form-control" rows="3" placeholder="Apartment / Flat, Street name, Landmark, Colony" required>{{ address.street or '' }}</textarea>
+                </div>
+
+                <!-- City, State & PIN Code -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label fw-semibold" for="city">City <span class="text-danger">*</span></label>
+                        <input type="text" id="city" name="city" class="form-control" placeholder="City" value="{{ address.city or '' }}" required>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label fw-semibold" for="state">State <span class="text-danger">*</span></label>
+                        <input type="text" id="state" name="state" class="form-control" placeholder="State" value="{{ address.state or '' }}" required>
+                    </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label fw-semibold" for="pincode">Postal / PIN Code <span class="text-danger">*</span></label>
+                        <input type="text" id="pincode" name="pincode" class="form-control font-monospace" placeholder="e.g. 500081" value="{{ address.pincode or '' }}" maxlength="10" required>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="saveAddressCheck" checked>
+                        <label class="form-check-label small text-secondary" for="saveAddressCheck">
+                            Save this as my default shipping address for faster future checkouts
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-between align-items-sm-center pt-2">
+                    <a href="/user/cart" class="btn btn-outline-secondary px-3 py-2">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Cart
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg px-4 py-2">
+                        <span>Continue to Payment</span>
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Order Summary -->
+    <div class="col-12 col-lg-4">
+        <div class="sc-card p-3 p-sm-4 sticky-top" style="top: 85px;">
+            <h5 class="fw-bold mb-3 text-dark">Order Items Summary</h5>
+
+            <!-- Items List -->
+            <div class="mb-3" style="max-height: 260px; overflow-y: auto;">
+                {% for pid, item in cart.items() %}
+                <div class="d-flex align-items-center gap-3 py-2 {% if not loop.last %}border-bottom{% endif %}">
+                    <img src="/static/uploads/product_images/{{ item.image }}" 
+                         alt="{{ item.name }}" 
+                         class="rounded-2 border p-1 bg-light flex-shrink-0"
+                         style="width: 46px; height: 46px; object-fit: contain;"
+                         onerror="this.src='https://placehold.co/46x46?text=Item';">
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="small fw-semibold text-dark text-truncate">{{ item.name }}</div>
+                        <div class="text-muted small">Qty: {{ item.quantity }} &times; ₹{{ "%.2f"|format(item.price|float) }}</div>
+                    </div>
+                    <div class="text-end fw-bold text-dark small">
+                        ₹{{ "%.2f"|format((item.price * item.quantity)|float) }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <hr class="my-3 text-muted">
+
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-secondary small">Items Subtotal:</span>
+                <span class="fw-medium text-dark">₹{{ "%.2f"|format(grand_total|float) }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-secondary small">Shipping:</span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle">FREE</span>
+            </div>
+
+            <hr class="my-3 text-muted">
+
+            <div class="d-flex justify-content-between align-items-baseline mb-4">
+                <span class="fw-bold text-dark fs-6">Total Amount:</span>
+                <span class="fw-bold fs-4 text-primary">₹{{ "%.2f"|format(grand_total|float) }}</span>
+            </div>
+
+            <!-- Trust Badge -->
+            <div class="p-3 bg-light rounded-3 border text-center text-muted small">
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-1">
+                    <i class="bi bi-shield-check text-success fs-5"></i>
+                    <span class="fw-semibold text-dark">100% Secure Checkout</span>
+                </div>
+                <div style="font-size: 0.78rem;">Powered by Razorpay payment gateway</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

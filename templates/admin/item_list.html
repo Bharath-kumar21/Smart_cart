@@ -1,0 +1,138 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Product Catalog - Admin Portal{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 mb-md-4">
+    <div>
+        <h2 class="fw-bold mb-1 fs-3 fs-md-2"><i class="bi bi-boxes text-primary me-2"></i>Product Catalog</h2>
+        <p class="text-muted small mb-0">Manage items, inspect listings, update prices, and maintain store inventory.</p>
+    </div>
+    <div>
+        <a href="/admin/add-item" class="btn btn-primary px-4 py-2">
+            <i class="bi bi-plus-circle-fill me-1"></i> Add New Product
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="sc-card p-3 mb-4">
+    <form method="GET" action="/admin/item-list" class="row g-2 align-items-center">
+        <!-- Search Input -->
+        <div class="col-12 col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" name="search" class="form-control border-start-0" 
+                       placeholder="Search products..."
+                       value="{{ request.args.get('search', '') }}">
+            </div>
+        </div>
+
+        <!-- Category Dropdown -->
+        <div class="col-12 col-sm-7 col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                    <i class="bi bi-funnel"></i>
+                </span>
+                <select name="category" class="form-select border-start-0">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.category }}"
+                        {% if request.args.get('category') == cat.category %} selected {% endif %}>
+                        {{ cat.category }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Submit & Reset -->
+        <div class="col-12 col-sm-5 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+                <i class="bi bi-search"></i> Filter
+            </button>
+            {% if request.args.get('search') or request.args.get('category') %}
+            <a href="/admin/item-list" class="btn btn-outline-secondary" title="Reset Filters">
+                <i class="bi bi-x-lg"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Products Table -->
+{% if products %}
+<div class="sc-table-card">
+    <div class="table-responsive">
+        <table class="table sc-table align-middle">
+            <thead>
+                <tr>
+                    <th scope="col" style="width: 70px;">ID</th>
+                    <th scope="col" style="width: 80px;">Image</th>
+                    <th scope="col">Product Title</th>
+                    <th scope="col">Category</th>
+                    <th scope="col" class="text-end">Price</th>
+                    <th scope="col" class="text-center" style="width: 160px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        <span class="font-monospace text-muted small">#{{ product.product_id }}</span>
+                    </td>
+                    <td>
+                        <img src="/static/uploads/product_images/{{ product.image }}" 
+                             alt="{{ product.name }}"
+                             class="rounded-3 border p-1 bg-light flex-shrink-0"
+                             style="width: 50px; height: 50px; object-fit: contain;"
+                             onerror="this.src='https://placehold.co/50x50?text=Item';">
+                    </td>
+                    <td>
+                        <span class="fw-semibold text-dark">{{ product.name }}</span>
+                    </td>
+                    <td>
+                        <span class="sc-category-badge mb-0">{{ product.category }}</span>
+                    </td>
+                    <td class="text-end fw-bold text-dark">
+                        ₹{{ "%.2f"|format(product.price|float) if product.price is number else product.price }}
+                    </td>
+                    <td class="text-center">
+                        <div class="d-inline-flex gap-1">
+                            <a href="/admin/view-item/{{ product.product_id }}" class="btn btn-outline-primary btn-sm px-2 py-1" title="View Product">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="/admin/update-item/{{ product.product_id }}" class="btn btn-outline-secondary btn-sm px-2 py-1" title="Edit Product">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="/admin/delete-item/{{ product.product_id }}" 
+                               class="btn btn-outline-danger btn-sm px-2 py-1" 
+                               title="Delete Product"
+                               onclick="return confirm('Are you sure you want to permanently delete \'{{ product.name }}\'?')">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<!-- Empty State -->
+<div class="sc-card sc-empty-state my-4">
+    <div class="sc-empty-icon text-muted">
+        <i class="bi bi-boxes display-3"></i>
+    </div>
+    <h3 class="fw-bold mb-2">No Products in Inventory</h3>
+    <p class="text-muted mb-4 max-w-md mx-auto">There are currently no products matching your query or in the catalog.</p>
+    <a href="/admin/add-item" class="btn btn-primary btn-lg px-4">
+        <i class="bi bi-plus-circle me-1"></i> Add First Product
+    </a>
+</div>
+{% endif %}
+{% endblock %}

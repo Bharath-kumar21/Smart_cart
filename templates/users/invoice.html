@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice #{{ order.order_id }} - SmartCart</title>
+
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+        }
+        .invoice-container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        .header-table {
+            width: 100%;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #4f46e5;
+            padding-bottom: 15px;
+        }
+        .brand-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4f46e5;
+            margin: 0;
+        }
+        .brand-subtitle {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        .invoice-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0f172a;
+            text-align: right;
+            margin: 0;
+        }
+        .meta-text {
+            font-size: 11px;
+            color: #475569;
+            text-align: right;
+        }
+        .info-table {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+        .info-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 4px;
+        }
+        .info-card h4 {
+            margin: 0 0 6px 0;
+            font-size: 12px;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .items-table th {
+            background-color: #4f46e5;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 9px 10px;
+            text-align: left;
+            text-transform: uppercase;
+        }
+        .items-table td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 9px 10px;
+            font-size: 11px;
+            color: #334155;
+        }
+        .items-table tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .totals-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .total-box {
+            background-color: #eef2ff;
+            border: 1px solid #c7d2fe;
+            padding: 10px 14px;
+            text-align: right;
+            border-radius: 4px;
+        }
+        .total-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1e1b4b;
+        }
+        .total-amount {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+        .status-badge {
+            display: inline-block;
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 3px;
+        }
+        .footer-note {
+            margin-top: 40px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="invoice-container">
+    <!-- Header -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td valign="top" style="width: 50%;">
+                <div class="brand-title">SmartCart</div>
+                <div class="brand-subtitle">Your Premier Destination for Quality Products</div>
+                <div class="brand-subtitle">Email: support@smartcart.local | Web: www.smartcart.local</div>
+            </td>
+            <td valign="top" style="width: 50%;" class="text-right">
+                <div class="invoice-title">TAX INVOICE</div>
+                <div class="meta-text"><strong>Invoice Ref:</strong> #INV-{{ order.order_id }}</div>
+                <div class="meta-text"><strong>Order Date:</strong> {{ order.created_at }}</div>
+                <div class="meta-text" style="margin-top: 5px;">
+                    <span class="status-badge">Payment: {{ order.payment_status }}</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Customer, Shipping & Payment Information -->
+    <table class="info-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td valign="top" style="width: 48%;">
+                <div class="info-card">
+                    <h4>Shipped & Billed To</h4>
+                    <p style="margin: 2px 0;"><strong>Recipient:</strong> {{ order.shipping_name or (user.name if user else session.get('user_name', 'Customer')) }}</p>
+                    {% if order.shipping_phone %}
+                    <p style="margin: 2px 0;"><strong>Phone:</strong> {{ order.shipping_phone }}</p>
+                    {% endif %}
+                    {% if order.shipping_address %}
+                    <p style="margin: 2px 0;"><strong>Delivery Address:</strong> {{ order.shipping_address }}</p>
+                    <p style="margin: 2px 0;"><strong>City, State:</strong> {{ order.city or '' }}{% if order.city and order.state %}, {% endif %}{{ order.state or '' }} - {{ order.pincode or '' }}</p>
+                    {% endif %}
+                    <p style="margin: 2px 0;"><strong>Customer ID:</strong> #{{ order.user_id }}</p>
+                    {% if user and user.email %}
+                    <p style="margin: 2px 0;"><strong>Email:</strong> {{ user.email }}</p>
+                    {% elif session.get('user_email') %}
+                    <p style="margin: 2px 0;"><strong>Email:</strong> {{ session.get('user_email') }}</p>
+                    {% endif %}
+                </div>
+            </td>
+            <td style="width: 4%;"></td>
+            <td valign="top" style="width: 48%;">
+                <div class="info-card">
+                    <h4>Payment Details</h4>
+                    <p style="margin: 2px 0;"><strong>Payment Gateway:</strong> Razorpay</p>
+                    <p style="margin: 2px 0;"><strong>Status:</strong> {{ (order.payment_status or 'PAID')|upper }}</p>
+                    {% if order.razorpay_payment_id %}
+                    <p style="margin: 2px 0;"><strong>Transaction Ref:</strong> {{ order.razorpay_payment_id }}</p>
+                    {% endif %}
+                    {% if order.razorpay_order_id %}
+                    <p style="margin: 2px 0;"><strong>Gateway Order ID:</strong> {{ order.razorpay_order_id }}</p>
+                    {% endif %}
+                    <p style="margin: 2px 0;"><strong>Order Date:</strong> {{ order.created_at }}</p>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Items Table -->
+    <table class="items-table" cellpadding="0" cellspacing="0">
+        <thead>
+            <tr>
+                <th style="width: 8%;" class="text-center">#</th>
+                <th style="width: 52%;">Product Description</th>
+                <th style="width: 12%;" class="text-center">Qty</th>
+                <th style="width: 14%;" class="text-right">Unit Price</th>
+                <th style="width: 14%;" class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for it in items %}
+            <tr>
+                <td class="text-center">{{ loop.index }}</td>
+                <td><strong>{{ it.product_name }}</strong></td>
+                <td class="text-center">{{ it.quantity }}</td>
+                <td class="text-right">Rs. {{ "%.2f"|format(it.price|float) if it.price is number else it.price }}</td>
+                <td class="text-right"><strong>Rs. {{ "%.2f"|format((it.price * it.quantity)|float) }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals Summary -->
+    <table class="totals-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td style="width: 50%;"></td>
+            <td style="width: 50%;">
+                <div class="total-box">
+                    <span class="total-label">Grand Total Paid:&nbsp;&nbsp;</span>
+                    <span class="total-amount">Rs. {{ "%.2f"|format(order.amount|float) if order.amount is number else order.amount }}</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer Note -->
+    <div class="footer-note">
+        <p style="margin: 2px 0;">Thank you for your business! If you have any inquiries regarding this invoice, please contact support@smartcart.local</p>
+        <p style="margin: 2px 0;">This is a computer-generated tax invoice and requires no physical signature.</p>
+    </div>
+</div>
+
+</body>
+</html>

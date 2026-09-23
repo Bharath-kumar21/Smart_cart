@@ -1,0 +1,121 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}Products Catalog - SmartCart{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3 mb-md-4">
+    <div>
+        <h2 class="fw-bold mb-1 fs-3 fs-md-2">Discover Products</h2>
+        <p class="text-muted small mb-0">Browse our wide selection of top-rated items at competitive prices.</p>
+    </div>
+    <div>
+        <span class="badge bg-white text-secondary border px-3 py-2 rounded-pill shadow-sm">
+            <i class="bi bi-box-seam me-1 text-primary"></i> {{ products|length }} Items
+        </span>
+    </div>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="sc-card p-3 mb-4">
+    <form method="GET" action="/user/products" class="row g-2 align-items-center">
+        <!-- Search Input -->
+        <div class="col-12 col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" name="search" class="form-control border-start-0" 
+                       placeholder="Search products..."
+                       value="{{ request.args.get('search', '') }}">
+            </div>
+        </div>
+
+        <!-- Category Dropdown -->
+        <div class="col-12 col-sm-7 col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                    <i class="bi bi-funnel"></i>
+                </span>
+                <select name="category" class="form-select border-start-0">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.category }}"
+                        {% if request.args.get('category') == cat.category %} selected {% endif %}>
+                        {{ cat.category }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Submit & Clear Buttons -->
+        <div class="col-12 col-sm-5 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+                <i class="bi bi-search"></i> Apply
+            </button>
+            {% if request.args.get('search') or request.args.get('category') %}
+            <a href="/user/products" class="btn btn-outline-secondary" title="Clear Filters">
+                <i class="bi bi-x-lg"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Products Grid -->
+{% if products %}
+<div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 g-sm-3 g-md-4">
+    {% for product in products %}
+    <div class="col">
+        <div class="sc-card sc-card-hoverable sc-product-card">
+            <!-- Product Image -->
+            <a href="/user/product/{{ product.product_id }}" class="sc-img-wrapper text-decoration-none">
+                <img src="/static/uploads/product_images/{{ product.image }}" 
+                     alt="{{ product.name }}"
+                     loading="lazy"
+                     onerror="this.src='https://placehold.co/300x200?text=No+Image';">
+            </a>
+
+            <!-- Product Body -->
+            <div class="sc-card-body">
+                <span class="sc-category-badge align-self-start">{{ product.category }}</span>
+                <h5 class="sc-product-title" title="{{ product.name }}">
+                    <a href="/user/product/{{ product.product_id }}" class="text-dark text-decoration-none">
+                        {{ product.name }}
+                    </a>
+                </h5>
+
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between mt-auto pt-2 pt-sm-3 border-top gap-2">
+                    <div>
+                        <small class="text-muted d-none d-sm-block" style="font-size: 0.72rem;">Price</small>
+                        <span class="sc-price">₹{{ "%.2f"|format(product.price|float) if product.price is number else product.price }}</span>
+                    </div>
+                    <div class="d-flex gap-1 gap-sm-2 w-100 w-sm-auto justify-content-between justify-content-sm-end">
+                        <a href="/user/product/{{ product.product_id }}" class="btn btn-outline-primary btn-sm flex-fill flex-sm-grow-0 px-2 py-1" title="View Details">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="/user/add-to-cart/{{ product.product_id }}" class="btn btn-primary btn-sm flex-fill flex-sm-grow-0 px-2 px-sm-3 py-1" title="Add to Cart">
+                            <i class="bi bi-cart-plus"></i> <span class="d-none d-sm-inline">Add</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<!-- Empty State -->
+<div class="sc-card sc-empty-state my-4">
+    <div class="sc-empty-icon">
+        <i class="bi bi-search"></i>
+    </div>
+    <h4 class="fw-bold mb-2">No Products Found</h4>
+    <p class="text-muted mb-4 max-w-md mx-auto">We couldn't find any products matching your search or category filter.</p>
+    <a href="/user/products" class="btn btn-primary">
+        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset All Filters
+    </a>
+</div>
+{% endif %}
+{% endblock %}

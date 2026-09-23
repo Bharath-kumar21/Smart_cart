@@ -1,0 +1,90 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}Dashboard - SmartCart{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Hero Welcome Banner -->
+        <div class="sc-hero p-3 p-sm-4 p-md-5 mb-4">
+            <div class="row align-items-center">
+                <div class="col-12 col-lg-8">
+                    <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-semibold mb-2 mb-sm-3 shadow-sm d-inline-block">
+                        <i class="bi bi-stars text-warning me-1"></i> Customer Dashboard
+                    </span>
+                    <h1 class="sc-hero-title mb-2">Welcome back, {{ user_name }}!</h1>
+                    <p class="lead mb-3 mb-sm-4 text-white-50" style="font-size: 1rem;">Discover top trending items, manage your cart, and track recent orders seamlessly on any device.</p>
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+                        <a href="/user/products" class="btn btn-light text-primary fw-semibold px-4 py-2">
+                            <i class="bi bi-bag me-1"></i> Start Shopping
+                        </a>
+                        <a href="/user/cart" class="btn btn-outline-light px-4 py-2">
+                            <i class="bi bi-cart3 me-1"></i> View Cart ({{ session.get('cart', {})|length }})
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center d-none d-lg-block">
+                    <i class="bi bi-cart-check display-1 text-white opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Cards -->
+<div class="row g-3 g-md-4 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="sc-card sc-card-hoverable p-3 p-sm-4 h-100 d-flex flex-column">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-3 bg-primary-subtle text-primary p-3 fs-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px;">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Browse Catalog</h5>
+                    <small class="text-muted">Find the best deals</small>
+                </div>
+            </div>
+            <p class="text-muted small flex-grow-1">Explore our latest arrivals, electronics, accessories, and seasonal specials with real-time search & filters.</p>
+            <a href="/user/products" class="btn btn-outline-primary w-100 mt-2">
+                Browse Products <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="sc-card sc-card-hoverable p-3 p-sm-4 h-100 d-flex flex-column">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-3 bg-success-subtle text-success p-3 fs-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px;">
+                    <i class="bi bi-cart-check"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Shopping Cart</h5>
+                    <small class="text-muted">{{ session.get('cart', {})|length }} items saved</small>
+                </div>
+            </div>
+            <p class="text-muted small flex-grow-1">Review items currently in your cart, adjust quantities, calculate grand total, and checkout securely.</p>
+            <a href="/user/cart" class="btn btn-outline-success w-100 mt-2">
+                Go to Cart <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="sc-card sc-card-hoverable p-3 p-sm-4 h-100 d-flex flex-column">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-3 bg-warning-subtle text-warning p-3 fs-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px;">
+                    <i class="bi bi-receipt"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">My Orders</h5>
+                    <small class="text-muted">Track & Invoices</small>
+                </div>
+            </div>
+            <p class="text-muted small flex-grow-1">View payment confirmations, track your previous purchases, and instantly download official PDF invoices.</p>
+            <a href="/user/my-orders" class="btn btn-outline-warning text-dark w-100 mt-2">
+                View Orders <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

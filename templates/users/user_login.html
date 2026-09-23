@@ -1,0 +1,52 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}User Login - SmartCart{% endblock %}
+
+{% block content %}
+<div class="sc-auth-wrapper">
+    <div class="sc-auth-card">
+        <div class="sc-auth-header">
+            <div class="sc-auth-icon">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1 fs-4 fs-md-3">Welcome Back</h3>
+            <p class="text-muted small">Sign in to your SmartCart account to continue</p>
+        </div>
+
+        <form method="POST" action="/user-login">
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label" for="loginEmail">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <input type="email" id="loginEmail" name="email" class="form-control border-start-0" placeholder="name@example.com" required autofocus>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label class="form-label" for="loginPassword">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input type="password" id="loginPassword" name="password" class="form-control border-start-0" placeholder="Enter your password" required>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 py-2 fs-6 fw-semibold mb-3">
+                Sign In <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </form>
+
+        <div class="text-center pt-3 border-top">
+            <p class="text-muted small mb-0">Don't have an account? 
+                <a href="/user-register" class="fw-semibold text-primary">Create Account</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

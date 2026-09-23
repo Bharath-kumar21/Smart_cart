@@ -1,0 +1,157 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}Checkout & Payment - SmartCart{% endblock %}
+
+{% block content %}
+<!-- Checkout Breadcrumb / Step Indicator -->
+<div class="row justify-content-center mb-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="sc-card p-3 shadow-sm">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                        <i class="bi bi-check-lg"></i>
+                    </span>
+                    <a href="/user/cart" class="text-decoration-none text-muted small fw-medium">1. Cart</a>
+                </div>
+                <i class="bi bi-chevron-right text-muted small"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                        <i class="bi bi-check-lg"></i>
+                    </span>
+                    <a href="/user/checkout" class="text-decoration-none text-muted small fw-medium">2. Address</a>
+                </div>
+                <i class="bi bi-chevron-right text-muted small"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary text-white rounded-circle p-2 d-inline-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px;">
+                        3
+                    </span>
+                    <span class="text-primary small fw-bold">3. Payment</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center py-2">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="sc-card p-3 p-sm-4 p-md-5 text-center shadow-lg">
+            <!-- Header Icon -->
+            <div class="sc-auth-header mb-3 mb-md-4">
+                <div class="sc-auth-icon bg-primary-subtle text-primary mx-auto" style="width: 60px; height: 60px; font-size: 1.8rem;">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h3 class="fw-bold mt-2 mb-1 fs-4 fs-md-3">Complete Your Payment</h3>
+                <p class="text-muted small">Review your delivery address and proceed to secure payment.</p>
+            </div>
+
+            <!-- Shipping Address Summary Card -->
+            {% if shipping_address %}
+            <div class="bg-light rounded-4 p-3 mb-3 text-start border">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-uppercase fw-bold text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                        <i class="bi bi-geo-alt text-primary me-1"></i> Delivery Address
+                    </span>
+                    <a href="/user/checkout" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                </div>
+                <div class="fw-bold text-dark fs-6">{{ shipping_address.full_name }}</div>
+                <div class="text-secondary small mb-1">{{ shipping_address.phone }}</div>
+                <div class="text-muted small">
+                    {{ shipping_address.street }}, {{ shipping_address.city }}, {{ shipping_address.state }} - <span class="font-monospace fw-semibold text-dark">{{ shipping_address.pincode }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Order Payable Box -->
+            <div class="bg-light rounded-4 p-3 p-sm-4 mb-4 text-start border">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small">Gateway Ref:</span>
+                    <span class="font-monospace small fw-bold text-dark text-truncate ms-2">{{ order_id }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small">Gateway:</span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Razorpay 256-bit Secure</span>
+                </div>
+                <hr class="my-3 text-muted">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <span class="fw-bold text-dark fs-6">Total Payable:</span>
+                    <span class="display-6 fw-bold text-primary fs-3 fs-md-2">₹{{ "%.2f"|format(amount|float) if amount is number else amount }}</span>
+                </div>
+            </div>
+
+            <!-- Razorpay Button -->
+            <button id="rzp-button" class="btn btn-success btn-lg w-100 py-3 fw-bold mb-3 shadow-sm">
+                <i class="bi bi-lock-fill me-2"></i> Pay Now with Razorpay
+            </button>
+
+            <!-- Secondary Action -->
+            <div class="text-center mt-2">
+                <a href="/user/checkout" class="text-secondary small text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Delivery Address
+                </a>
+            </div>
+
+            <!-- Security Assurance -->
+            <div class="mt-4 pt-3 border-top d-flex justify-content-center align-items-center gap-3 text-muted small">
+                <div class="d-flex align-items-center gap-1">
+                    <i class="bi bi-shield-lock-fill text-success"></i>
+                    <span>256-Bit SSL</span>
+                </div>
+                <span>&bull;</span>
+                <div class="d-flex align-items-center gap-1">
+                    <i class="bi bi-credit-card-2-front text-primary"></i>
+                    <span>UPI / Cards / NetBanking</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+var options = {
+    "key": "{{ key_id }}",
+    "amount": "{{ (amount * 100)|int }}",
+    "currency": "INR",
+    "name": "SmartCart",
+    "description": "Order Payment",
+    "order_id": "{{ order_id }}",
+    "handler": function (response){
+        var form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/verify-payment"; 
+
+        var fields = {
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature
+        };
+
+        for (var name in fields) {
+            var input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = fields[name];
+            form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    },
+    "theme": {
+        "color": "#4f46e5"
+    }
+};
+
+var rzp = new Razorpay(options);
+document.getElementById('rzp-button').onclick = function(e){
+    rzp.open();
+    e.preventDefault();
+}
+</script>
+{% endblock %}

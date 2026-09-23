@@ -1,0 +1,84 @@
+{% extends "users/base_user.html" %}
+
+{% block title %}My Orders - SmartCart{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3 mb-md-4">
+    <div>
+        <h2 class="fw-bold mb-1 fs-3 fs-md-2"><i class="bi bi-box-seam-fill text-primary me-2"></i>My Orders</h2>
+        <p class="text-muted small mb-0">Track your order history and download official invoices.</p>
+    </div>
+    {% if orders %}
+    <div>
+        <span class="badge bg-white text-secondary border px-3 py-2 rounded-pill shadow-sm">
+            {{ orders|length }} Total {% if orders|length == 1 %}Order{% else %}Orders{% endif %}
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+{% if orders|length == 0 %}
+<!-- Empty Orders State -->
+<div class="sc-card sc-empty-state my-4">
+    <div class="sc-empty-icon text-muted">
+        <i class="bi bi-box2 display-3"></i>
+    </div>
+    <h3 class="fw-bold mb-2">No Orders Placed Yet</h3>
+    <p class="text-muted mb-4 max-w-md mx-auto">You have not completed any purchases with us yet. Check out our latest products and start filling your cart!</p>
+    <a href="/user/products" class="btn btn-primary btn-lg px-4 sc-btn-mobile-full">
+        <i class="bi bi-bag me-1"></i> Start Shopping
+    </a>
+</div>
+{% else %}
+
+<div class="row g-3 g-md-4">
+    <div class="col-12">
+        {% for order in orders %}
+        <div class="sc-card sc-card-hoverable p-3 p-sm-4 mb-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <!-- Order Identity & Details -->
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <h5 class="fw-bold text-dark mb-0">Order #{{ order.order_id }}</h5>
+                        <span class="badge-status-paid">
+                            <i class="bi bi-check-circle-fill me-1"></i> {{ order.payment_status|capitalize }}
+                        </span>
+                    </div>
+                    <div class="text-muted small d-flex flex-wrap gap-2 gap-sm-3">
+                        <span><i class="bi bi-calendar3 me-1"></i> {{ order.created_at }}</span>
+                        {% if order.razorpay_payment_id %}
+                        <span><i class="bi bi-credit-card me-1"></i> Ref: {{ order.razorpay_payment_id }}</span>
+                        {% endif %}
+                    </div>
+                    {% if order.shipping_name or order.shipping_address %}
+                    <div class="text-secondary small mt-1 text-truncate" style="max-width: 450px;">
+                        <i class="bi bi-geo-alt me-1 text-primary"></i> Deliver to: <strong class="text-dark">{{ order.shipping_name }}</strong> &bull; {{ order.city or '' }}{% if order.pincode %}, {{ order.pincode }}{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Price & Responsive Action Buttons -->
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between justify-content-md-end gap-3 pt-2 pt-md-0 border-top border-md-0">
+                    <div class="text-start text-md-end">
+                        <small class="text-muted d-block" style="font-size: 0.72rem;">Total Amount</small>
+                        <span class="fs-4 fw-bold text-primary">₹{{ "%.2f"|format(order.amount|float) if order.amount is number else order.amount }}</span>
+                    </div>
+
+                    <div class="d-flex gap-2 w-100 w-sm-auto">
+                        <a href="/user/order-success/{{ order.order_id }}" class="btn btn-outline-primary btn-sm flex-fill px-3 py-2 touch-target">
+                            <i class="bi bi-eye me-1"></i> Details
+                        </a>
+                        <a href="/user/download-invoice/{{ order.order_id }}" class="btn btn-primary btn-sm flex-fill px-3 py-2 touch-target">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Invoice PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}
