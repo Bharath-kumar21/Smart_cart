@@ -1,46 +1,29 @@
-# SmartCart - PythonAnywhere Deployment Guide
+# SmartCart - 100% Free PythonAnywhere Deployment Guide (SQLite)
 
-This guide walks you through deploying your **SmartCart** Flask + MySQL eCommerce application to **PythonAnywhere** step-by-step.
-
----
-
-## Prerequisites
-1. A free or paid account on [PythonAnywhere](https://www.pythonanywhere.com/).
-2. Your PythonAnywhere **username** (e.g., `bharath`).
-3. Your code pushed to GitHub (or uploaded via zip).
+This guide walks you through deploying your **SmartCart** Flask eCommerce application to **PythonAnywhere** completely **FREE** with **zero database configuration** using SQLite.
 
 ---
 
-## Step 1: Set Up MySQL Database on PythonAnywhere
-
-1. Log in to your [PythonAnywhere Dashboard](https://www.pythonanywhere.com/).
-2. Navigate to the **Databases** tab.
-3. Under **Database password**, set a new password and click **Change password**.
-4. Under **Create a database**, type `smartcart` and click **Create database**.
-   - Your database will be named: `<your-username>$smartcart`
-   - Your database host is: `<your-username>.mysql.pythonanywhere-services.com`
-   - Your database user is: `<your-username>`
+## Why SQLite?
+- **100% Free**: No need to pay PythonAnywhere for external databases.
+- **Zero Server Setup**: No database host, no database passwords, and no connection errors.
+- **Built Right In**: SQLite is built into Python standard library and pre-populated with your products and admin account in `smartcart.db`.
 
 ---
 
-## Step 2: Clone Code & Import Database
+## Step 1: Open a Bash Console on PythonAnywhere
 
-1. Go to the **Consoles** tab on PythonAnywhere.
-2. Under **Start a new console**, click **Bash**.
-3. Clone your repository into your home directory:
+1. Log in to [PythonAnywhere](https://www.pythonanywhere.com/).
+2. Go to the **Consoles** tab and click **Bash** under **Start a new console**.
+3. Clone your GitHub repository into your home directory:
    ```bash
-   git clone https://github.com/<your-github-username>/<your-repo-name>.git smartcart
+   git clone https://github.com/Bharath-kumar21/Smart_cart.git smartcart
    cd smartcart
    ```
-4. Import the included `smartcart.sql` dump file into your PythonAnywhere database:
-   ```bash
-   mysql -u <your-username> -h <your-username>.mysql.pythonanywhere-services.com -p '<your-username>$smartcart' < smartcart.sql
-   ```
-   *(When prompted, enter the MySQL password you set in Step 1)*.
 
 ---
 
-## Step 3: Create Virtual Environment & Install Dependencies
+## Step 2: Create Virtual Environment & Install Packages
 
 In the same Bash console, run:
 ```bash
@@ -48,28 +31,28 @@ mkvirtualenv --python=/usr/bin/python3.10 smartcart-env
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
-*(This will install only the necessary lightweight dependencies like Flask, mysql-connector-python, bcrypt, razorpay, and xhtml2pdf without exhausting free-tier disk limits)*.
+*(This will install Flask, Flask-Mail, bcrypt, razorpay, and xhtml2pdf in under 2 minutes)*.
 
 ---
 
-## Step 4: Configure Web App on PythonAnywhere
+## Step 3: Configure the Web App
 
-1. Go to the **Web** tab in PythonAnywhere dashboard.
+1. Go to the **Web** tab on the PythonAnywhere dashboard.
 2. Click **Add a new web app**.
-3. Click **Next**, choose **Manual configuration** *(Important: Do NOT click "Flask")*.
-4. Select **Python 3.10**, then click **Next**.
-5. After the web app is created, configure paths in the **Web** tab:
+3. Click **Next**, choose **Manual configuration** *(Important: Do NOT select "Flask")*, and pick **Python 3.10**.
+4. After the web app is created, configure the paths in the **Web** tab:
+   - **Virtualenv**: `/home/<your-username>/.virtualenvs/smartcart-env`
    - **Source code**: `/home/<your-username>/smartcart`
    - **Working directory**: `/home/<your-username>/smartcart`
-   - **Virtualenv**: `/home/<your-username>/.virtualenvs/smartcart-env`
+   *(Replace `<your-username>` with your actual PythonAnywhere username)*.
 
 ---
 
-## Step 5: Configure the WSGI Configuration File
+## Step 4: Configure the WSGI File
 
-1. Still in the **Web** tab, under **Code**, click on the link next to **WSGI configuration file** (e.g. `/var/www/<your-username>_pythonanywhere_com_wsgi.py`).
-2. Delete all existing code in the file.
-3. Paste the following configuration (replace `<your-username>` and passwords with your actual values):
+1. In the **Web** tab under **Code**, click on the link next to **WSGI configuration file** (e.g. `/var/www/<your-username>_pythonanywhere_com_wsgi.py`).
+2. Delete everything currently in the file.
+3. Paste the following configuration:
 
 ```python
 import sys
@@ -80,55 +63,48 @@ project_home = '/home/<your-username>/smartcart'
 if project_home not in sys.path:
     sys.path.insert(0, project_home)
 
-# 2. Production Environment Variables
-os.environ['SECRET_KEY'] = 'your_super_secret_key_12345'
-os.environ['DB_HOST'] = '<your-username>.mysql.pythonanywhere-services.com'
-os.environ['DB_USER'] = '<your-username>'
-os.environ['DB_PASSWORD'] = '<your_mysql_password>'
-os.environ['DB_NAME'] = '<your-username>$smartcart'
+# 2. SQLite Database Path (Automatic & Free)
+os.environ['DB_TYPE'] = 'sqlite'
+os.environ['SQLITE_DB_PATH'] = os.path.join(project_home, 'smartcart.db')
 
 # 3. Email Settings
 os.environ['MAIL_SERVER'] = 'smtp.gmail.com'
 os.environ['MAIL_PORT'] = '587'
 os.environ['MAIL_USE_TLS'] = 'True'
-os.environ['MAIL_USERNAME'] = 'your_email@gmail.com'
-os.environ['MAIL_PASSWORD'] = 'your_gmail_app_password'
+os.environ['MAIL_USERNAME'] = 'bharatkumartalagana@gmail.com'
+os.environ['MAIL_PASSWORD'] = 'dgqq kypd zsfu elku'
 
-# 4. Razorpay Gateway Keys
-os.environ['RAZORPAY_KEY_ID'] = 'rzp_test_your_key_id'
-os.environ['RAZORPAY_KEY_SECRET'] = 'your_razorpay_secret'
+# 4. Razorpay Keys
+os.environ['RAZORPAY_KEY_ID'] = 'rzp_test_TcBFYBENX0MBj5'
+os.environ['RAZORPAY_KEY_SECRET'] = 'gbbrSL3GfHGkEPlwwrq7W1kN'
 
 # 5. Import Flask app as application
 from app import app as application
 ```
-
-4. Click **Save** in the top right corner.
+*(Remember to replace `<your-username>` with your PythonAnywhere username)*.
+4. Click **Save** in the top right.
 
 ---
 
-## Step 6: Configure Static Files (CSS, JS, Uploads)
+## Step 5: Configure Static Files (CSS, JS, Uploads)
 
-1. Return to the **Web** tab.
-2. Scroll down to the **Static files** section.
-3. Add the following entry:
+1. Return to the **Web** tab and scroll down to the **Static files** section.
+2. Add the following static directory mapping:
    - **URL**: `/static/`
    - **Directory**: `/home/<your-username>/smartcart/static`
 
 ---
 
-## Step 7: Reload & Launch!
+## Step 6: Reload & Launch!
 
-1. Scroll to the very top of the **Web** tab.
+1. Scroll to the top of the **Web** tab.
 2. Click the big green **Reload <your-username>.pythonanywhere.com** button.
-3. Visit your live site:
+3. Open your browser and visit:
    `https://<your-username>.pythonanywhere.com`
 
 ---
 
-## Troubleshooting Tips
-
-- **Check Error Logs**: If your site displays an error, go to the **Web** tab and click on the **Error log** link under the **Log files** section.
-- **PythonAnywhere Free Tier Whitelist**: On PythonAnywhere's free plan, outbound HTTP requests are restricted to an approved whitelist. `api.razorpay.com` and `smtp.gmail.com` are typically permitted. If Razorpay throws an API connection error, post on the PythonAnywhere forums to request `api.razorpay.com` be added to your whitelist or use test mode.
-- **Default Admin Account**:
-  - Email: `bharatkumartalagana@gmail.com`
-  - Portal: `https://<your-username>.pythonanywhere.com/admin-login`
+## Default Login Credentials
+- **Admin Portal**: `https://<your-username>.pythonanywhere.com/admin-login`
+  - **Email**: `bharatkumartalagana@gmail.com`
+  - **Password**: *(Your existing admin password)*

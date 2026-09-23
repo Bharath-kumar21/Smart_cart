@@ -1,6 +1,10 @@
-from flask import Flask, render_template, request, redirect, session, flash,jsonify
+from flask import Flask, render_template, request, redirect, session, flash, jsonify, make_response
 from flask_mail import Mail, Message
-import mysql.connector
+import sqlite3
+try:
+    import mysql.connector
+except ImportError:
+    mysql = None
 import bcrypt
 import random
 import config
@@ -8,15 +12,11 @@ import os
 from werkzeug.utils import secure_filename
 import razorpay
 import traceback
-from flask import make_response, render_template
 from utils.pdf_generator import generate_pdf
-
 
 razorpay_client = razorpay.Client(
     auth=(config.RAZORPAY_KEY_ID, config.RAZORPAY_KEY_SECRET)
 )
-
-
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
@@ -30,16 +30,145 @@ app.config['MAIL_PASSWORD'] = config.MAIL_PASSWORD
 
 mail = Mail(app)
 
+# ---------------- SQLITE ADAPTER CLASSES ----------------
+class SQLiteCursorWrapper:
+    """Wraps sqlite3.Cursor to provide MySQL-compatible syntax (%s to ?) and dictionary results."""
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def execute(self, query, params=None):
+        # Convert MySQL parameter placeholder %s to SQLite ?
+        query = query.replace('%s', '?')
+        if params is not None:
+            return self._cursor.execute(query, params)
+        return self._cursor.execute(query)
+
+    def fetchone(self):
+        row = self._cursor.fetchone()
+        return dict(row) if row is not None else None
+
+    def fetchall(self):
+        return [dict(row) for row in self._cursor.fetchall()]
+
+    @property
+    def lastrowid(self):
+        return self._cursor.lastrowid
+
+    def close(self):
+        self._cursor.close()
+
+class SQLiteConnectionWrapper:
+    """Wraps sqlite3.Connection to provide cursor(dictionary=True) and standard transaction methods."""
+    def __init__(self, conn):
+        self._conn = conn
+        self._conn.row_factory = sqlite3.Row
+
+    def cursor(self, dictionary=True):
+        return SQLiteCursorWrapper(self._conn.cursor())
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        self._conn.close()
+
+def init_sqlite_db():
+    """Initializes tables in smartcart.db if they do not exist."""
+    db_path = getattr(config, 'SQLITE_DB_PATH', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'smartcart.db'))
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.executescript("""
+        CREATE TABLE IF NOT EXISTS admin (
+            admin_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            email TEXT UNIQUE,
+            password TEXT,
+            profile_image TEXT
+        );
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            email TEXT UNIQUE,
+            password TEXT
+        );
+        CREATE TABLE IF NOT EXISTS products (
+            product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            description TEXT,
+            category TEXT,
+            price REAL,
+            image TEXT
+        );
+        CREATE TABLE IF NOT EXISTS orders (
+            order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            shipping_name TEXT,
+            shipping_phone TEXT,
+            shipping_address TEXT,
+            city TEXT,
+            state TEXT,
+            pincode TEXT,
+            razorpay_order_id TEXT,
+            razorpay_payment_id TEXT,
+            amount REAL,
+            payment_status TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        );
+        CREATE TABLE IF NOT EXISTS order_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER,
+            product_id INTEGER,
+            product_name TEXT,
+            quantity INTEGER,
+            price REAL,
+            FOREIGN KEY (order_id) REFERENCES orders(order_id),
+            FOREIGN KEY (product_id) REFERENCES products(product_id)
+        );
+        CREATE TABLE IF NOT EXISTS user_addresses (
+            address_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            full_name TEXT,
+            phone TEXT,
+            street TEXT,
+            city TEXT,
+            state TEXT,
+            pincode TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        );
+    """)
+    # Seed default admin if missing
+    cur.execute("SELECT COUNT(*) FROM admin")
+    if cur.fetchone()[0] == 0:
+        cur.execute(
+            "INSERT INTO admin (name, email, password) VALUES (?, ?, ?)",
+            ('bharath', 'bharatkumartalagana@gmail.com', '$2b$12$A.9dCiEGAi2L2sc6bvosbubpMrmAFq14iSDvNbBx5ymMJRV7Qz70O')
+        )
+    conn.commit()
+    conn.close()
 
 # ---------------- DB CONNECTION FUNCTION --------------
 def get_db_connection():
-    return mysql.connector.connect(
-        host=config.DB_HOST,
-        
-        user=config.DB_USER,
-        password=config.DB_PASSWORD,
-        database=config.DB_NAME
-    )
+    db_type = getattr(config, 'DB_TYPE', 'sqlite').lower()
+    if db_type == 'mysql':
+        if mysql is None:
+            raise ImportError("mysql-connector-python is not installed. Please install it or set DB_TYPE='sqlite'.")
+        return mysql.connector.connect(
+            host=config.DB_HOST,
+            user=config.DB_USER,
+            password=config.DB_PASSWORD,
+            database=config.DB_NAME
+        )
+    else:
+        init_sqlite_db()
+        db_path = getattr(config, 'SQLITE_DB_PATH', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'smartcart.db'))
+        conn = sqlite3.connect(db_path)
+        return SQLiteConnectionWrapper(conn)
 
 
 # ---------------------------------------------------------

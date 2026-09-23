@@ -9,7 +9,14 @@ except ImportError:
 # Application Security
 SECRET_KEY = os.environ.get("SECRET_KEY", "Bharath123")
 
-# Database Configuration (MySQL)
+# Database Selection: 'sqlite' (Free, Serverless, Zero-Config) or 'mysql'
+DB_TYPE = os.environ.get("DB_TYPE", "sqlite").lower()
+SQLITE_DB_PATH = os.environ.get(
+    "SQLITE_DB_PATH", 
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "smartcart.db")
+)
+
+# MySQL Configuration (Used only if DB_TYPE='mysql')
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_USER = os.environ.get("DB_USER", "root")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "abcd")
