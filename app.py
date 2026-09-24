@@ -704,7 +704,7 @@ def admin_profile_update():
     flash("Profile updated successfully!", "success")
     return redirect('/admin/profile')
 
-# ROUTE: USER REGISTRATION
+# ROUTE: USER REGISTRATION (SEND OTP)
 # =================================================================
 @app.route('/user-register', methods=['GET', 'POST'])
 def user_register():
@@ -712,36 +712,155 @@ def user_register():
     if request.method == 'GET':
         return render_template("users/user_register.html")
 
-    name = request.form['name']
-    email = request.form['email']
-    password = request.form['password']
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
+    password = request.form.get('password', '').strip()
+
+    if not (name and email and password):
+        flash("All fields are required!", "danger")
+        return redirect('/user-register')
 
     # Check if user already exists
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
+    cursor.execute("SELECT user_id FROM users WHERE email=%s", (email,))
     existing_user = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
     if existing_user:
         flash("Email already registered! Please login.", "danger")
+        return redirect('/user-login')
+
+    # Hash password using bcrypt
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    # Save signup data in session
+    session['user_signup_name'] = name
+    session['user_signup_email'] = email
+    session['user_signup_password'] = hashed_password
+
+    # Generate 6-digit OTP
+    otp = random.randint(100000, 999999)
+    session['user_signup_otp'] = str(otp)
+
+    # Send OTP Email
+    try:
+        message = Message(
+            subject="SmartCart Account Verification Code",
+            sender=config.MAIL_USERNAME,
+            recipients=[email]
+        )
+        message.body = (
+            f"Hello {name},\n\n"
+            f"Thank you for signing up for SmartCart!\n\n"
+            f"Your 6-digit email verification code is: {otp}\n\n"
+            f"Please enter this code on the verification page to activate your account.\n"
+            f"If you did not request this, please ignore this email.\n\n"
+            f"Best regards,\n"
+            f"The SmartCart Team"
+        )
+        mail.send(message)
+        flash("A 6-digit verification code has been sent to your email!", "info")
+    except Exception as e:
+        app.logger.error("Failed to send user verification email: %s", str(e))
+        flash("Could not send verification email. Please check your email configuration.", "danger")
         return redirect('/user-register')
 
-    # Hash password
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    return redirect('/user-verify-otp')
 
-    # Insert new user
-    cursor.execute(
-        "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
-        (name, email, hashed_password)
-    )
-    conn.commit()
+# =================================================================
+# ROUTE: USER OTP VERIFICATION
+# =================================================================
+@app.route('/user-verify-otp', methods=['GET', 'POST'])
+def user_verify_otp():
+    if 'user_signup_email' not in session:
+        flash("Please complete the registration form first.", "warning")
+        return redirect('/user-register')
+
+    if request.method == 'GET':
+        return render_template("users/user_verify_otp.html", email=session.get('user_signup_email'))
+
+    user_otp = request.form.get('otp', '').strip()
+    session_otp = str(session.get('user_signup_otp', ''))
+
+    if not user_otp or str(user_otp) != session_otp:
+        flash("Invalid verification code. Please check your email and try again.", "danger")
+        return redirect('/user-verify-otp')
+
+    name = session.get('user_signup_name')
+    email = session.get('user_signup_email')
+    hashed_password = session.get('user_signup_password')
+
+    if not (name and email and hashed_password):
+        flash("Registration session expired. Please register again.", "danger")
+        return redirect('/user-register')
+
+    # Insert verified user into database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
+            (name, email, hashed_password)
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        app.logger.error("Error creating user: %s", str(e))
+        flash("Failed to create user account. Please try again.", "danger")
+        cursor.close()
+        conn.close()
+        return redirect('/user-register')
 
     cursor.close()
     conn.close()
 
-    flash("Registration successful! Please login.", "success")
+    # Clear signup session keys
+    session.pop('user_signup_name', None)
+    session.pop('user_signup_email', None)
+    session.pop('user_signup_password', None)
+    session.pop('user_signup_otp', None)
+
+    flash("Account verified and created successfully! Please login.", "success")
     return redirect('/user-login')
+
+# =================================================================
+# ROUTE: RESEND USER OTP
+# =================================================================
+@app.route('/user-resend-otp')
+def user_resend_otp():
+    if 'user_signup_email' not in session:
+        flash("Please complete the registration form first.", "warning")
+        return redirect('/user-register')
+
+    email = session['user_signup_email']
+    name = session.get('user_signup_name', 'Customer')
+
+    otp = random.randint(100000, 999999)
+    session['user_signup_otp'] = str(otp)
+
+    try:
+        message = Message(
+            subject="SmartCart Account Verification Code (Resent)",
+            sender=config.MAIL_USERNAME,
+            recipients=[email]
+        )
+        message.body = (
+            f"Hello {name},\n\n"
+            f"Your new 6-digit email verification code is: {otp}\n\n"
+            f"Please enter this code on the verification page to activate your account.\n\n"
+            f"Best regards,\n"
+            f"The SmartCart Team"
+        )
+        mail.send(message)
+        flash("A new verification code has been dispatched to your email!", "success")
+    except Exception as e:
+        app.logger.error("Failed to resend verification email: %s", str(e))
+        flash("Could not send email. Please try again later.", "danger")
+
+    return redirect('/user-verify-otp')
 # ROUTE: USER LOGIN
 # =================================================================
 @app.route('/user-login', methods=['GET', 'POST'])
