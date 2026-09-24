@@ -30,6 +30,23 @@ app.config['MAIL_PASSWORD'] = config.MAIL_PASSWORD
 
 mail = Mail(app)
 
+def verify_password_hash(plain_password, stored_hash):
+    """Safely verifies plain_password against stored_hash regardless of whether stored_hash is str or bytes."""
+    if not plain_password or not stored_hash:
+        return False
+    if isinstance(stored_hash, str):
+        if stored_hash.startswith("b'") and stored_hash.endswith("'"):
+            stored_hash = stored_hash[2:-1]
+        hash_bytes = stored_hash.encode('utf-8')
+    elif isinstance(stored_hash, bytes):
+        hash_bytes = stored_hash
+    else:
+        return False
+    try:
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hash_bytes)
+    except Exception:
+        return False
+
 # ---------------- SQLITE ADAPTER CLASSES ----------------
 class SQLiteCursorWrapper:
     """Wraps sqlite3.Cursor to provide MySQL-compatible syntax (%s to ?) and dictionary results."""
@@ -303,9 +320,7 @@ def admin_login():
         return redirect('/admin-login')
 
     # Step 2: Compare entered password with hashed password
-    stored_hashed_password = admin['password'].encode('utf-8')
-
-    if not bcrypt.checkpw(password.encode('utf-8'), stored_hashed_password):
+    if not verify_password_hash(password, admin['password']):
         flash("Incorrect password! Try again.", "danger")
         return redirect('/admin-login')
 
@@ -886,7 +901,7 @@ def user_login():
         return redirect('/user-login')
 
     # Verify password
-    if not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+    if not verify_password_hash(password, user['password']):
         flash("Incorrect password!", "danger")
         return redirect('/user-login')
 
